@@ -1,0 +1,9 @@
+*.pptx
+debug
+*.asv
+ResultsTable*.mat
+images/
+*.xlsx
+daniel/
+old/
+segmentation_errors_filtered/
