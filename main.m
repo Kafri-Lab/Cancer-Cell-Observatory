@@ -7,30 +7,32 @@ PlateMap = load_plate_map_from_google_spreadsheet();
 
 %% Convert given datasets from .mat to .csv
 clear filters; n=1;
-fliters(n).column = {'Dataset; strcmp(Dataset,''20170811_LL_domneg_p1c2'')'};
+filters(n).column = {'Dataset; strcmp(Dataset,''20170811_LL_domneg_p1c2'')'};
 n=n+1;
-fliters(n).column = {'Dataset; strcmp(Dataset,''20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1'')'};
+filters(n).column = {'Dataset; strcmp(Dataset,''20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1'')'};
 n=n+1;
 
 for i=1:size(filters,2)
   % Select experiment 
-  SubsetPlateMap = filter_table(PlateMap, fliters(i))
+  SubsetPlateMap = filter_table(PlateMap, filters(i));
+  if length(unique(SubsetPlateMap.Dataset)) > 1
+      error('Cannot save experiment to csv because I am expecting only one experiment here.')
+  end
+  SubsetPlateMap(:,{'Row','Column'})={'*'}; % Load ALL data for this experiment, not just some wells
   % Load experiment as .mat
   data_type = 'SegResultFile';
   ResultTable = load_dataset(SubsetPlateMap,data_type);
   % Save experiment as .csv
-  [filepath,filename,ext] = fileparts(SubsetPlateMap.SegResultFile)
+  [filepath,filename,ext] = fileparts(char(SubsetPlateMap.SegResultFile(1)));
   output_csv_file = sprintf('%s/%s.csv',filepath,filename);
-  ResultTable_to_CSV(SubsetPlateMap,output_csv_file);
-  % Save location of .csv to GoogleSpreadsheet
-  TODO
+  NewTable = ResultTable_to_CSV(ResultTable,output_csv_file);
 end
 
 
 %% Calculate new measurement
 for i=1:size(filters,2)
   % Select experiment 
-  SubsetPlateMap = filter_table(PlateMap, fliters(i))
+  SubsetPlateMap = filter_table(PlateMap, filters(i))
   % Load experiment as .csv
   data_type = 'csvFile';
   ResultTable = load_dataset(SubsetPlateMap,data_type);
