@@ -16,10 +16,16 @@ function Table = fun()
   Table.Properties.VariableNames = spreadsheet_column_names; % set proper column names
 
   % Set string columns that should be numeric to double type
-  numeric_columns = {'Plate','Row','Column','PlateSize','Magnification'};
+  numeric_columns = {'Plate','PlateSize','Magnification','CellCh','NucCh','PassageNumber'};
   for i=1:length(numeric_columns)
     temp = array2table(str2double(Table{:,numeric_columns(i)}));
     Table(:,numeric_columns(i)) = [];
     Table(:,numeric_columns(i)) = temp;
+  end
+
+  if any(ismember(Table.Properties.VariableNames,'END'))
+    Table.END = [];
+  else
+    error('Last column in GoogleSpreadsheet must be END. This fixes a strange bug.')
   end
 end
