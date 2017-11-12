@@ -30,10 +30,35 @@ end
 
 
 %% Curate cells by eliminating bad cell traces
-csv_file = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Processed OutPutFiles\Dataset_20171103_RB_LFS__2017_11_03T17_30_39RESULTS\ResultTable - 2 wells, 1 fields, thresh 160_with_Traces_full.csv';
-ResultTable = readtable(data_file);
+% Load data
+% csv_file = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Processed OutPutFiles\Dataset_20171103_RB_LFS__2017_11_03T17_30_39RESULTS\ResultTable - 2 wells, 1 fields, thresh 160_with_Traces_full.csv';
+csv_file = 'ResultTable - 2 wells, 1 fields, thresh 160_with_Traces_full.csv';
+ResultTable = readtable(csv_file);
 Filter.column = {'Row; Row == 5 ', 'Column; Column == 2 '};
-SubsetTable = filter_table(DataTable, Filter);
+SubsetTable = filter_table(ResultTable, Filter);
+
+% Load images
+count=1;
+well = SubsetTable.FileName{1}(1:12); % eg. r05c02f19p01
+channel = SubsetTable.CellCh(1); % eg. 1
+img_dir = SubsetTable.ImageDir{1};
+for t=sort(unique(SubsetTable.Time))'
+  img_file = sprintf('%s/%s-ch%dsk%dfk1fl1.tiff',img_dir,well,channel,t);
+  fprintf('Loading image file "%s"\n',img_file);
+  img = imread(img_file);
+  if ~exist('img_stack')
+    img_stack = zeros(size(img,1),size(img,2),length(unique(SubsetTable.Time)));
+  end
+  img_stack(:,:,count)=img;
+  count=count+1;
+end
+figure; imshow3D(img_stack,[]);
+
+
+
+unique(SubsetTable.FileName)
+
+
 % load images
 % display color overlay
 % ginput loop
