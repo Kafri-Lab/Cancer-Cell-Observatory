@@ -7,9 +7,9 @@ PlateMap = load_plate_map_from_google_spreadsheet();
 
 %% Convert given datasets from .mat to .csv
 clear filters; n=1;
-filters(n).column = {'Dataset; strcmp(Dataset,''20170811_LL_domneg_p1c2'')'};
-n=n+1;
-filters(n).column = {'Dataset; strcmp(Dataset,''20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1'')'};
+% filters(n).column = {'Dataset; strcmp(Dataset,''20170811_LL_domneg_p1c2'')'}; % Lior
+% filters(n).column = {'Dataset; strcmp(Dataset,''20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1'')'}; % Heather
+filters(n).column = {'Dataset; strcmp(Dataset,''20171103_RB_LFS__2017-11-03T17_30_39-Measurement1'')'}; % Ron
 n=n+1;
 
 for i=1:size(filters,2)
@@ -29,6 +29,17 @@ for i=1:size(filters,2)
 end
 
 
+%% Curate cells by eliminating bad cell traces
+csv_file = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Processed OutPutFiles\Dataset_20171103_RB_LFS__2017_11_03T17_30_39RESULTS\ResultTable - 2 wells, 1 fields, thresh 160_with_Traces_full.csv';
+ResultTable = readtable(data_file);
+Filter.column = {'Row; Row == 5 ', 'Column; Column == 2 '};
+SubsetTable = filter_table(DataTable, Filter);
+% load images
+% display color overlay
+% ginput loop
+% save csv
+
+
 %% Calculate new measurement
 for i=1:size(filters,2)
   % Select experiment 
@@ -37,7 +48,7 @@ for i=1:size(filters,2)
   data_type = 'csvFile';
   ResultTable = load_dataset(SubsetPlateMap,data_type);
   % Calculate new measurement
-  new_measurment(SubsetPlateMap,'output_csv_file');
+  new_measurment(SubsetPlateMap,'output_csv_file'); % INCOMPLETE
 end
 
 
@@ -47,7 +58,7 @@ clear filters; n=1;
 filters(n).sort = 'SaddlePoint'; % mitotic
 filters(n).last = 5;
 
-filters(n).column = {
+filters(n).column = { ...
             'SaddlePoint; SaddlePoint < 50', ... % not mitotic
             'NArea; NArea > median(NArea)', ...
             'NArea; NArea < prctile(NArea,99.9)' ...

@@ -1,4 +1,6 @@
 function NewTable = fun(Table, output_csv_file)
+  fprintf('[ResultTable_to_CSV.m] Saving table with %d rows to csv: %s\n', height(Table), char(output_csv_file))
+
   NewTable = Table;
 
   % not needed
@@ -10,7 +12,6 @@ function NewTable = fun(Table, output_csv_file)
 
 
   % Handle column deletes
-  % fprintf('Deleting columns\n');
   for i=1:length(del)
     if ~ismember(NewTable.Properties.VariableNames,del(i))
       continue
@@ -19,11 +20,12 @@ function NewTable = fun(Table, output_csv_file)
   end
 
   % Handle columns that will be converted from cell arrays to a space delimited string
-  % fprintf('Converting cell arrays to a space delimited string\n');
   for i=1:length(cell_to_string)
     if ~ismember(NewTable.Properties.VariableNames,cell_to_string(i))
       continue
     end
+    fprintf('[ResultTable_to_CSV.m] Adding column "%s" to csv.\n', char(cell_to_string(i)))
+
     eval(sprintf('NewTable.%s = [];',char(cell_to_string(i))));
     for n=1:height(Table)
       eval(sprintf('NewTable.%s(n) = strjoin(string(cell2mat(Table.%s(n))));',char(cell_to_string(i)), char(cell_to_string(i))));
@@ -34,7 +36,7 @@ function NewTable = fun(Table, output_csv_file)
   if strcmp(output_csv_file,'none')
     return;
   end
-  fprintf('Saving CSV to file: %s\n', output_csv_file);
+  fprintf('[ResultTable_to_CSV.m] Saving CSV to file: %s\n', char(output_csv_file));
   writetable(NewTable,output_csv_file);
 
 end

@@ -6,6 +6,7 @@ function ResultTableAll = fun(PlateMap,data_type)
   
   % For each dataset load the specified rows and columns
   for i=1:length(unique_datasets)
+    fprintf('[load_dataset.m] Loading data set: %s\n', char(unique_datasets))
     row_filter = '';
     column_filter = '';
 
@@ -15,7 +16,8 @@ function ResultTableAll = fun(PlateMap,data_type)
     % Load dataset
     if strcmp(data_type,'SegResultFile')
       ResultTable = load(char(DatasetMap.SegResultFile(1)));
-      ResultTable = ResultTable.ResultTable;
+      % ResultTable = ResultTable.ResultTable;
+      ResultTable = ResultTable.SubsetTable;
     elseif strcmp(data_type,'csvFile')
       data_file = char(DatasetMap.SegResultFile(1));
       [filepath,filename,ext] = fileparts(data_file)
@@ -37,6 +39,7 @@ function ResultTableAll = fun(PlateMap,data_type)
     end
 
     % Add meta information (if not present) from PlateMap to each row in the ResultTable
+    fprintf('[load_dataset.m] Adding metadata to data set: %s\n', char(unique_datasets))
     for col_name=PlateMap.Properties.VariableNames
       % Skip if ResultTable already has this column
       if any(ismember(ResultTable.Properties.VariableNames,char(col_name)))
@@ -57,6 +60,7 @@ function ResultTableAll = fun(PlateMap,data_type)
     end
     
     % Add uuid for each cell (if not present)
+    fprintf('[load_dataset.m] Adding Cell UUIDs data set: %s\n', char(unique_datasets))
     ResultTable.CellID = uuid_array(height(ResultTable))';
 
     if isempty(ResultTableAll)
