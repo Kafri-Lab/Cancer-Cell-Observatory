@@ -1,5 +1,5 @@
 function NewTable = fun(Table)
-  fprintf('[ResultTable_to_CSV.m] Saving table with %d rows to csv: %s\n', height(Table), char(output_csv_file))
+  fprintf('[ResultTable_to_CSV.m] Converting table format with %d rows.\n', height(Table))
 
   NewTable = Table;
 

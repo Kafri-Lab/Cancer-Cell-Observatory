@@ -1,8 +1,14 @@
 function fun(PlateMap,filters)
   CuratedTableFull = table();
-  for i=1:size(filters,2)    % Select relevant experiments
+  for i=1:size(filters,2)
+    % Select relevant experiments
+    SubsetPlateMap = filter_table(PlateMap, filters(i));
+
     fprintf('[curate_cells.m] Load data\n');
-    SubsetTable = load_filtered_data(PlateMap, filters(i));
+    ResultTable = load_dataset(SubsetPlateMap);
+
+    % Select relevant data
+    SubsetTable = filter_table(ResultTable, filters(i));
 
     fprintf('[curate_cells.m] Load images\n');
     img_stack = load_image_stack(SubsetTable);

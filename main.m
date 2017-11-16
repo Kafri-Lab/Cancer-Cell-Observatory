@@ -43,16 +43,18 @@ filters(n).column = {
 curate_cells(PlateMap,filters)
 
 
+clear filters; n=1;
+filters(n).column = {
+    'Dataset;  strcmp(Dataset,''20171103_RB_LFS__2017-11-03T17_30_39-Measurement1'')', ...
+    'Field; Field == 19 ' , ...
+    'Time; Time == 193 ' , ...
+};
+
 %% Major functions
 convert_mat_to_csv(PlateMap,filters) % create csv files
 calculate_new_measurement(PlateMap,filters) % add measurments to table
 curate_cells(PlateMap,filters)
-
-%% Filter Platemap
-SubsetPlateMap = filter_table(PlateMap, filters(1);
-
-%% Load dataset
-ResultTable = load_dataset(SubsetPlateMap);
+SubsetTable = load_filtered_data(PlateMap,filters(i));
 
 %% Plot given datasets
 for i=1:size(filters,2)
