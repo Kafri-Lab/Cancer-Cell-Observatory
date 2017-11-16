@@ -1,4 +1,4 @@
-function Table = fun(Table, Filter)
+function Table = fun(Table, Filter, varargin)
   %% Handle Filter.columns
   if isfield(Filter,'column') && ~isempty(Filter.column)
     for ii=1:length(Filter.column)
@@ -6,6 +6,11 @@ function Table = fun(Table, Filter)
       column_filter_arr = strsplit(column_filter, ';');
       column_name = char(column_filter_arr(1));
       operator = char(column_filter_arr(2));
+
+      if ~any(ismember(Table.Properties.VariableNames,column_name))
+        warning('[filter_table.m] Cannot filter on column name "%s" because it doesn''t exist', column_name)
+        continue
+      end
 
       eval(sprintf('%s = Table.%s;',column_name, column_name)); % create a variable (ex. NArea) to make possible filters like 'NArea > median(NArea)'
       do_filter = sprintf('Table(%s,:)', operator);

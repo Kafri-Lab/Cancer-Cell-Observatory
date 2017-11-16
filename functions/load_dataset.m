@@ -1,4 +1,4 @@
-function ResultTableAll = fun(PlateMap,data_type)
+function ResultTableAll = fun(PlateMap)
   unique_datasets = unique(PlateMap.Dataset);
   unique_datasets(strcmp(unique_datasets,'')) = []; % remove empty string
 
@@ -6,25 +6,32 @@ function ResultTableAll = fun(PlateMap,data_type)
   
   % For each dataset load the specified rows and columns
   for i=1:length(unique_datasets)
-    fprintf('[load_dataset.m] Loading data set: %s\n', char(unique_datasets))
+    data_name = char(unique_datasets(i));
+    fprintf('[load_dataset.m] Loading data set: %s\n', data_name)
     row_filter = '';
     column_filter = '';
 
     % Get entries in PlateMap for just this dataset
-    DatasetMap = PlateMap(strcmp(PlateMap.Dataset,unique_datasets(i)),:);
+    DatasetMap = PlateMap(strcmp(PlateMap.Dataset,data_name),:);
+
+    % Find data file on disk
+    data_file = char(DatasetMap.SegResultFile(1));
+    [filepath,filename,data_type] = fileparts(data_file);
+    if ~exist(data_file)
+      error('Cannot load dataset because cannot find file: %s .', data_file)
+    end
 
     % Load dataset
-    if strcmp(data_type,'SegResultFile')
-      ResultTable = load(char(DatasetMap.SegResultFile(1)));
+    if strcmp(data_type,'.mat')
+      ResultTable = load(data_file);
       % ResultTable = ResultTable.ResultTable;
       ResultTable = ResultTable.SubsetTable;
-    elseif strcmp(data_type,'csvFile')
-      data_file = char(DatasetMap.SegResultFile(1));
-      [filepath,filename,ext] = fileparts(data_file)
-      data_file = sprintf('%s/%s.csv',filepath,filename);
+      %ResultTable = ResultTable_to_CSV(ResultTable);
+    elseif strcmp(data_type,'.csv')
+      %data_file = sprintf('%s/%s.csv',filepath,filename);
       ResultTable = readtable(data_file);
     else
-      error('Cannot load datasen because specified data_type "%s" us known.', data_type)
+      error('Cannot load dataset because specified data_type "%s" is unknown.', data_type)
     end
 
     % Consolidate userfriendly filter format of '1','1,2', or '1,2,1:3','*' into a list [1 2 3]. Used for row and column filters in Daniel's Plate Map for Everything (GoogleSpreadsheet)
@@ -39,12 +46,12 @@ function ResultTableAll = fun(PlateMap,data_type)
     end
 
     % Add meta information (if not present) from PlateMap to each row in the ResultTable
-    fprintf('[load_dataset.m] Adding metadata to data set: %s\n', char(unique_datasets))
     for col_name=PlateMap.Properties.VariableNames
       % Skip if ResultTable already has this column
       if any(ismember(ResultTable.Properties.VariableNames,char(col_name)))
         continue
       end
+      fprintf('[load_dataset.m] Adding metadata "%s" to dataset: %s\n', col_name, data_name)
       % For each of the wells given in the PlateMap add the PlateMap metadata to all the cells,
       % but since the info can be different per well, apply it well by well differently
       for ii=1:height(DatasetMap)
@@ -59,9 +66,11 @@ function ResultTableAll = fun(PlateMap,data_type)
       end
     end
     
-    % Add uuid for each cell (if not present)
-    fprintf('[load_dataset.m] Adding Cell UUIDs data set: %s\n', char(unique_datasets))
-    ResultTable.CellID = uuid_array(height(ResultTable))';
+    % Add uuid for each cell (if needed)
+    if ~any(ismember(ResultTable.Properties.VariableNames,'CellID'))
+      fprintf('[load_dataset.m] Adding Cell UUIDs to dataset: %s\n', data_name)
+      ResultTable.CellID = uuid_array(height(ResultTable))';
+    end
 
     if isempty(ResultTableAll)
       ResultTableAll = ResultTable;
@@ -70,7 +79,6 @@ function ResultTableAll = fun(PlateMap,data_type)
     end
 
 
-    % % Initialize columns that are new to ResultTableAll as found in ResultTable 
     % new_cols = setdiff(ResultTable.Properties.VariableNames, ResultTableAll.Properties.VariableNames)
     % for col_name=new_cols
     %   % Get a sample data point

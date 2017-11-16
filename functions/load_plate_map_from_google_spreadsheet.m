@@ -16,7 +16,7 @@ function Table = fun()
   Table.Properties.VariableNames = spreadsheet_column_names; % set proper column names
 
   % Set string columns that should be numeric to double type
-  numeric_columns = {'Plate','PlateSize','Magnification','CellCh','NucCh','PassageNumber'};
+  numeric_columns = {'Plate','PlateSize','Magnification','CellCh','NucCh','PassageNumber','Row','Column'};
   for i=1:length(numeric_columns)
     temp = array2table(str2double(Table{:,numeric_columns(i)}));
     Table(:,numeric_columns(i)) = [];
